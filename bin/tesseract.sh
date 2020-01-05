@@ -24,4 +24,5 @@ if [ $size -lt $threshold ]; then
 fi;
 tesseract screen.png res -l jpn+eng txt;
 echo Done OCR;
+echo python3 modifyText.py $1
 python3 modifyText.py $1

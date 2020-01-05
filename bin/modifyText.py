@@ -3,6 +3,7 @@ import os
 import unicodedata
 import json
 import sys
+import difflib
 
 spoken_dict_file_path = "spoken_dist.json"
 input_file_path = "res.txt"
@@ -45,14 +46,16 @@ def removeSpokenLine(draft_each_lines):
     try:
         spoken_dict = {}
         if os.path.exists(spoken_dict_file_path):
-            spoken_dict_file = open(spoken_dict_file_path)
+            spoken_dict_file = open(spoken_dict_file_path, encoding="utf-8")
             spoken_dict = json.load(spoken_dict_file)
 
             remove_keys = []
             for key in spoken_dict:
                 spoken_dict[key] += 1
-                if key in draft_each_lines and spoken_dict[key] <= threshold:
-                    draft_each_lines.remove(key)
+                if spoken_dict[key] <= threshold:
+                    for draft_line in draft_each_lines:
+                        if difflib.SequenceMatcher(None, draft_line, key).ratio() >= 0.6:
+                            draft_each_lines.remove(draft_line)
                 if spoken_dict[key] > threshold:
                     remove_keys.append(key)
 
@@ -63,7 +66,7 @@ def removeSpokenLine(draft_each_lines):
             if len(key) > 1:
                 spoken_dict[key] = 1
 
-        spoken_dict_file = open(spoken_dict_file_path, 'w')
+        spoken_dict_file = open(spoken_dict_file_path, 'w', encoding="utf-8")
         json.dump(spoken_dict, spoken_dict_file, sort_keys=True, indent=4)
     except Exception as e:
         print(e)
