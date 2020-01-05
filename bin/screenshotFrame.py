@@ -1,6 +1,6 @@
 import sys
 import tkinter as tk
-from tkinter import ttk, Button, filedialog
+from tkinter import ttk, Button, filedialog, messagebox
 import threading
 import subprocess
 import json
@@ -173,10 +173,11 @@ def entityChangesApply():
 
 if __name__ == '__main__':
     readSettings()
-    if not bouyomichan.checkBouyomiChanIsAlive():
-        bouyomichan.launchBouyomiChan(bouyomi_exe)
-        time.sleep(5)
     initializeRoot()
     initializeToolFrame()
     initializeCaptureFrame()
+    if not bouyomichan.checkBouyomiChanIsAlive():
+        bouyomichan.launchBouyomiChan(bouyomi_exe)
+        res = messagebox.showinfo(
+            "Confirmation", "棒読みちゃんを起動しました\n準備が完了したらOKを押してください")
     root.mainloop()
