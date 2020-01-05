@@ -40,18 +40,20 @@ def speakTextInImage():
         for img in image_file:
             print(img)
             shutil.copy(img, "screen.png")
-            modify.modifyCapture(option=modify.not_remove_key)
-            speak.speak(speak.loadDraft(), speak.akari)
+            capture_thread = defineCaptureThread(modify.not_remove_key)
+            capture_thread.start()
+            root.after(1000, checkCapture)
 
 
-def capture(x, y, width, height):
+def capture(x, y, width, height, option=""):
     print("start speech")
     subprocess.run(getCommand(x, y, width, height
                               ), shell=True)
     if diff.isImageDifferent():
         diff.copyCurrentImageAsPrevOne()
         print("different")
-        modify.modifyCapture()
+        modify.modifyCapture(option=option)
+        speak.setTalkable(True)
         speak.speak(speak.loadDraft(), speak.akari)
         print("end speech")
     root.after(1000, checkCapture)
@@ -71,6 +73,12 @@ def checkCapture():
 
 def startCapture():
     global be_caputuring, capture_thread
+    try:
+        if capture_thread.isAlive():
+            print("Alive")
+            return
+    except:
+        print("First Time?")
     be_caputuring = True
     cap_btn.configure(text="Stop", command=stopCapture)
     root.title(u"Screenshot Speak (Speaking)")
@@ -79,9 +87,9 @@ def startCapture():
     capture_thread.start()
 
 
-def defineCaptureThread():
+def defineCaptureThread(option=""):
     thread = threading.Thread(target=lambda: capture(root.winfo_x(), root.winfo_y(),
-                                                     root.winfo_width(), root.winfo_height()))
+                                                     root.winfo_width(), root.winfo_height(), option))
     thread.daemon = True
     return thread
 
@@ -89,6 +97,7 @@ def defineCaptureThread():
 def stopCapture():
     global be_caputuring
     be_caputuring = False
+    speak.setTalkable(False)
     cap_btn.configure(text="Capture", command=startCapture)
     root.title(u"Screenshot Speak")
 

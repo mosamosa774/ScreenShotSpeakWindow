@@ -33,7 +33,7 @@ def speak(draft, speaker, speed=100, tone=-1, volume=-1, voice=0):
                         min([max_speed, max([len(draft*2), speed])]), tone, volume, voice, speaker + talk))
                     subprocess.run(bouyomi_path %
                                    (min([max_speed, max([len(draft*2), speed])]), tone, volume, voice, speaker + talk), shell=True)
-                    time.sleep(len(talk)/3)
+                    time.sleep(len(talk)/4)
         else:
             print("No Speak")
     except Exception as e:

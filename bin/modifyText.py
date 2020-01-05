@@ -5,11 +5,11 @@ import json
 import sys
 import difflib
 
-spoken_dict_file_path = "spoken_dist.json"
+spoken_dict_file_path = "spoken_dist.txt"
 input_file_path = "res.txt"
 output_file_path = "modified_res.txt"
-threshold = 1000
 end_character = "。"
+queue_length = 200
 remove_spoken_text = True
 
 
@@ -44,30 +44,23 @@ def isOnlyEnglishSentence(sentence):
 
 def removeSpokenLine(draft_each_lines):
     try:
-        spoken_dict = {}
+        spoken_queue = []
         if os.path.exists(spoken_dict_file_path):
-            spoken_dict_file = open(spoken_dict_file_path, encoding="utf-8")
-            spoken_dict = json.load(spoken_dict_file)
+            with open(spoken_dict_file_path, 'r', encoding="utf-8") as spoken_dict_file:
+                for spoken_line in spoken_dict_file.readlines():
+                    spoken_queue.append(spoken_line.replace("\n", ""))
 
-            remove_keys = []
-            for key in spoken_dict:
-                spoken_dict[key] += 1
-                if spoken_dict[key] <= threshold:
-                    for draft_line in draft_each_lines:
-                        if difflib.SequenceMatcher(None, draft_line, key).ratio() >= 0.6:
-                            draft_each_lines.remove(draft_line)
-                if spoken_dict[key] > threshold:
-                    remove_keys.append(key)
+            for key in spoken_queue:
+                for draft_line in draft_each_lines:
+                    if difflib.SequenceMatcher(None, draft_line, key).ratio() >= 0.6:
+                        draft_each_lines.remove(draft_line)
 
-            for key in remove_keys:
-                del spoken_dict[key]
-
-        for key in draft_each_lines:
-            if len(key) > 1:
-                spoken_dict[key] = 1
-
-        spoken_dict_file = open(spoken_dict_file_path, 'w', encoding="utf-8")
-        json.dump(spoken_dict, spoken_dict_file, sort_keys=True, indent=4)
+        for draft_line in draft_each_lines:
+            if len(spoken_queue) >= queue_length:
+                spoken_queue.pop(0)
+            spoken_queue.append(draft_line)
+        with open(spoken_dict_file_path, 'w', encoding="utf-8") as spoken_dict_file:
+            spoken_dict_file.write('\n'.join(spoken_queue))
     except Exception as e:
         print(e)
 
@@ -80,7 +73,7 @@ def modify():
         txt = input_file.read()
         txt = txt.replace("  ", "\n")
         for line in txt.split("\n"):
-            if len(line) > 1 and not isBrokenSentence(line) and not line in draft_each_lines:
+            if len(line) > 2 and not isBrokenSentence(line) and not line in draft_each_lines:
                 draft_each_lines.append(line)
 
     if remove_spoken_text:
