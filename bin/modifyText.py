@@ -7,7 +7,7 @@ import sys
 spoken_dict_file_path = "spoken_dist.json"
 input_file_path = "res.txt"
 output_file_path = "modified_res.txt"
-threshold = 100
+threshold = 1000
 end_character = "。"
 remove_spoken_text = True
 
