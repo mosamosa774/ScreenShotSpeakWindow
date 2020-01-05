@@ -8,7 +8,7 @@
 windows10
 - python 3.6
   - desktopmagic
-  - pygui32
+  - pywin32
   - shutil
 - 棒読みちゃん
   - （あれば）Voiceroid
