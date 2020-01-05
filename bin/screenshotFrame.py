@@ -5,6 +5,7 @@ import threading
 import subprocess
 import json
 import modifyCapture as modify
+import imageDiff as diff
 import speak
 import bouyomichan
 import shutil
@@ -20,7 +21,6 @@ init_y = 20
 init_width = 500
 init_height = 400
 volume = 100
-interval_time = 5
 be_caputuring = False
 
 
@@ -48,22 +48,25 @@ def capture(x, y, width, height):
     print("start speech")
     subprocess.run(getCommand(x, y, width, height
                               ), shell=True)
-    modify.modifyCapture()
-    speak.speak(speak.loadDraft(), speak.akari)
-    print("end speech")
-    root.after(interval_time*1000, checkCapture)
+    if diff.isImageDifferent():
+        diff.copyCurrentImageAsPrevOne()
+        print("different")
+        modify.modifyCapture()
+        speak.speak(speak.loadDraft(), speak.akari)
+        print("end speech")
+    root.after(1000, checkCapture)
 
 
 def checkCapture():
     global capture_thread
     entityChangesApply()
-    if be_caputuring and not capture_thread.is_alive() and interval_time > 0:
+    if be_caputuring and not capture_thread.is_alive():
         print("reraise", be_caputuring, capture_thread.is_alive())
         capture_thread = defineCaptureThread()
         capture_thread.start()
-        root.after(interval_time*1000, checkCapture)
+        root.after(1000, checkCapture)
     elif be_caputuring and capture_thread.is_alive():
-        root.after(interval_time*1000, checkCapture)
+        root.after(1000, checkCapture)
 
 
 def startCapture():
@@ -99,12 +102,12 @@ def initializeCaptureFrame():
     tk.ttk.Style().configure("TP.TFrame", bd=4,
                              background="yellow", highlightbackground="blue", highlightthickness=0)
     capture_frame = ttk.Frame(master=root, style="TP.TFrame",
-                              width=init_width, height=init_height, relief="solid")
+                              width=init_width, height=init_height-tool_window_height, relief="solid")
     capture_frame.pack(side="top")
 
 
 def initializeToolFrame():
-    global tool_frame, cap_btn, interval_txt, volume_txt
+    global tool_frame, cap_btn, volume_txt
     tool_frame = ttk.Frame(master=root, width=init_width,
                            height=tool_window_height)
     tool_frame.pack(side="bottom", fill="both")
@@ -116,11 +119,6 @@ def initializeToolFrame():
     cap_btn.pack(side="left")
     input_frame = ttk.Frame(master=tool_frame)
     input_frame.pack(side="left")
-    interval_lbl = ttk.Label(master=input_frame, text='Interval')
-    interval_lbl.pack(side="left")
-    interval_txt = ttk.Entry(master=input_frame, width=5)
-    interval_txt.insert(0, str(interval_time))
-    interval_txt.pack(side="left")
 
     volume_lbl = ttk.Label(master=input_frame, text='Volume')
     volume_lbl.pack(side="left")
@@ -134,8 +132,7 @@ def initializeRoot():
     root = tk.Tk()
     root.title(u"Screenshot Speak")
     root.wm_attributes("-transparentcolor", "yellow")
-    root.geometry('%dx%d+%d+%d' % (init_width, init_height +
-                                   tool_window_height, init_x, init_y))
+    root.geometry('%dx%d+%d+%d' % (init_width, init_height, init_x, init_y))
     root.attributes("-topmost", True)
     root.bind("<Configure>", resize)
     root.resizable(True, True)
@@ -143,7 +140,7 @@ def initializeRoot():
 
 
 def readSettings():
-    global init_width, init_height, init_x, init_y, interval_time, volume, bouyomi_exe
+    global init_width, init_height, init_x, init_y, volume, bouyomi_exe
     print("open")
     settings = open(settings_path)
     settings_dict = json.load(settings)
@@ -151,7 +148,6 @@ def readSettings():
     init_y = int(settings_dict["y"])
     init_width = int(settings_dict["width"])
     init_height = int(settings_dict["height"])
-    interval_time = int(settings_dict["interval_time"])
     volume = int(settings_dict["volume"])
     bouyomi_exe = settings_dict["bouyomi_exe"]
 
@@ -160,19 +156,14 @@ def onClosing():
     print("close")
     entityChangesApply()
     save_dict = {"x": root.winfo_x(), "y": root.winfo_y(), "width": root.winfo_width(),
-                 "height": root.winfo_height(), "interval_time": interval_time, "volume": volume, "bouyomi_exe": bouyomi_exe}
+                 "height": root.winfo_height(), "volume": volume, "bouyomi_exe": bouyomi_exe}
     settings = open(settings_path, 'w')
     json.dump(save_dict, settings, sort_keys=True, indent=4)
     root.destroy()
 
 
 def entityChangesApply():
-    global interval_time, volume
-    try:
-        interval_time = max([int(interval_txt.get()), 5])
-    except:
-        interval_txt.delete(0, len(interval_txt.get()))
-        interval_txt.insert(0, str(interval_time))
+    global volume
     try:
         volume = max([min([int(volume_txt.get()), 100]), 1])
     except:
