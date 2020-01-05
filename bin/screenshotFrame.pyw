@@ -74,7 +74,6 @@ def startCapture():
     entityChangesApply()
     capture_thread = defineCaptureThread()
     capture_thread.start()
-    root.after(interval_time*1000, checkCapture)
 
 
 def defineCaptureThread():
