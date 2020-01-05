@@ -22,7 +22,7 @@ Ubuntu 18
 
 こんな感じ
 
-![アプリの見た目](app_image.png)
+![アプリの見た目](app_image.PNG)
 
 GUIウィンドウの枠内のテキストを読みます。
 
