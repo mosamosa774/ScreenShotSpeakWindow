@@ -1,16 +1,12 @@
+import os
 import sys
 import tkinter as tk
 from tkinter import ttk, Button, filedialog, messagebox
 import threading
 import subprocess
 import json
-import modifyCapture as modify
-import imageDiff as diff
-import speak
-import bouyomichan
-import shutil
-import os
 import time
+import shutil
 
 settings_path = "settings.json"
 error_x = 8
@@ -140,6 +136,7 @@ def initializeRoot():
     global root
     root = tk.Tk()
     root.title(u"Screenshot Speak")
+    root.iconbitmap("../src/icon.ico")
     root.wm_attributes("-transparentcolor", "yellow")
     root.geometry('%dx%d+%d+%d' % (init_width, init_height, init_x, init_y))
     root.attributes("-topmost", True)
@@ -181,6 +178,18 @@ def entityChangesApply():
 
 
 if __name__ == '__main__':
+    if not os.path.exists("bin"):
+        tk.Tk().withdraw()
+        res = messagebox.showinfo(
+            "Confirmation", "適正なパスで実行されていません")
+        sys.exit()
+    os.chdir("bin")
+
+    import bin.modifyCapture as modify
+    import bin.imageDiff as diff
+    import bin.speak as speak
+    import bin.bouyomichan as bouyomichan
+
     readSettings()
     initializeRoot()
     initializeToolFrame()
