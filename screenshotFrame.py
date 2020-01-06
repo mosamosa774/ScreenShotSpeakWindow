@@ -7,6 +7,12 @@ import subprocess
 import json
 import time
 import shutil
+import bin.modifyCapture as modify
+import bin.imageDiff as diff
+import bin.speak as speak
+import bin.frameTrayIcon as tray
+import bin.bouyomichan as bouyomichan
+
 
 settings_path = "settings.json"
 error_x = 8
@@ -24,6 +30,22 @@ def resize(event):
     capture_frame.config(height=root.winfo_height()
                          - tool_window_height - 15, width=root.winfo_width())
     tool_frame.config(width=root.winfo_width())
+
+
+def hideFrame():
+    root.withdraw()
+    threading.Thread(target=lambda: tray.generateTrayIcon()).start()
+    print("start hiding")
+    root.after(1000, checkHideingFrame)
+
+
+def checkHideingFrame():
+    if not tray.icon_exist:
+        print("end hiding")
+        root.update()
+        root.deiconify()
+        return
+    root.after(1000, checkHideingFrame)
 
 
 def speakTextInImage():
@@ -48,8 +70,10 @@ def capture(x, y, width, height, option=""):
     if diff.isImageDifferent():
         diff.copyCurrentImageAsPrevOne()
         print("different")
+        root.title(u"Speak Screenshot (Capturing)")
         modify.modifyCapture(option=option)
         speak.setTalkable(True)
+        root.title(u"Speak Screenshot (Speaking)")
         speak.speak(speak.loadDraft(), speak.akari)
         print("end speech")
     root.after(1000, checkCapture)
@@ -77,7 +101,6 @@ def startCapture():
         print("First Time?")
     be_caputuring = True
     cap_btn.configure(text="Stop", command=stopCapture)
-    root.title(u"Screenshot Speak (Speaking)")
     entityChangesApply()
     capture_thread = defineCaptureThread()
     capture_thread.start()
@@ -95,7 +118,7 @@ def stopCapture():
     be_caputuring = False
     speak.setTalkable(False)
     cap_btn.configure(text="Capture", command=startCapture)
-    root.title(u"Screenshot Speak")
+    root.title(u"Speak Screenshot")
 
 
 def getCommand(x, y, width, height):
@@ -112,16 +135,18 @@ def initializeCaptureFrame():
 
 
 def initializeToolFrame():
-    global tool_frame, cap_btn, volume_txt
+    global tool_frame, cap_btn, volume_txt, hide_btn
     tool_frame = ttk.Frame(master=root, width=init_width,
                            height=tool_window_height)
     tool_frame.pack(side="bottom", fill="both")
     sizegrip = ttk.Sizegrip(master=tool_frame)
     sizegrip.pack(anchor="se", side="right")
-    image_btn = Button(tool_frame, text="Image", command=speakTextInImage)
-    image_btn.pack(side="left")
     cap_btn = Button(tool_frame, text="Capture", command=startCapture)
     cap_btn.pack(side="left")
+    image_btn = Button(tool_frame, text="Image", command=speakTextInImage)
+    image_btn.pack(side="left")
+    hide_btn = Button(tool_frame, text="Hide", command=hideFrame)
+    hide_btn.pack(side="left")
     input_frame = ttk.Frame(master=tool_frame)
     input_frame.pack(side="left")
 
@@ -135,7 +160,7 @@ def initializeToolFrame():
 def initializeRoot():
     global root
     root = tk.Tk()
-    root.title(u"Screenshot Speak")
+    root.title(u"Speak Screenshot")
     root.iconbitmap("../src/icon.ico")
     root.wm_attributes("-transparentcolor", "yellow")
     root.geometry('%dx%d+%d+%d' % (init_width, init_height, init_x, init_y))
@@ -184,11 +209,6 @@ if __name__ == '__main__':
             "Confirmation", "適正なパスで実行されていません")
         sys.exit()
     os.chdir("bin")
-
-    import bin.modifyCapture as modify
-    import bin.imageDiff as diff
-    import bin.speak as speak
-    import bin.bouyomichan as bouyomichan
 
     readSettings()
     initializeRoot()
