@@ -65,12 +65,12 @@ def speakTextInImage():
 
 def capture(x, y, width, height, option=""):
     print("start speech")
+    root.title(u"Speak Screenshot (Capturing)")
     subprocess.run(getCommand(x, y, width, height
                               ), shell=True)
     if diff.isImageDifferent():
         diff.copyCurrentImageAsPrevOne()
         print("different")
-        root.title(u"Speak Screenshot (Capturing)")
         modify.modifyCapture(option=option)
         speak.setTalkable(True)
         root.title(u"Speak Screenshot (Speaking)")
