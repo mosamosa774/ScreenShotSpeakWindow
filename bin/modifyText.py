@@ -67,6 +67,21 @@ def removeSpokenLine(draft_each_lines):
     return draft_each_lines
 
 
+def removeOverlayedDraft(draft_each_lines):
+    remove_lines = []
+    for line in draft_each_lines:
+        if line in remove_lines:
+            continue
+        for another_line in draft_each_lines:
+            if draft_each_lines.index(line) == draft_each_lines.index(another_line):
+                continue
+            if difflib.SequenceMatcher(None, line, another_line).ratio() >= 0.6:
+                remove_lines.append(another_line)
+    for remove_line in remove_lines:
+        draft_each_lines.remove(remove_line)
+    return draft_each_lines
+
+
 def modify():
     draft_each_lines = []
     with open(input_file_path, encoding="utf-8") as input_file:
@@ -74,7 +89,10 @@ def modify():
         txt = txt.replace("  ", "\n")
         for line in txt.split("\n"):
             if len(line) > 2 and not isBrokenSentence(line) and not line in draft_each_lines:
+                print(line)
                 draft_each_lines.append(line)
+
+    draft_each_lines = removeOverlayedDraft(draft_each_lines)
 
     if remove_spoken_text:
         draft_each_lines = removeSpokenLine(draft_each_lines)
