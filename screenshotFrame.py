@@ -15,8 +15,8 @@ import bin.bouyomichan as bouyomichan
 
 
 settings_path = "settings.json"
-error_x = 8
-error_y = 30
+error_x = 9
+error_y = 32
 tool_window_height = 30
 init_x = 20
 init_y = 20
@@ -108,7 +108,7 @@ def startCapture():
 
 def defineCaptureThread(option=""):
     thread = threading.Thread(target=lambda: capture(root.winfo_x(), root.winfo_y(),
-                                                     root.winfo_width(), root.winfo_height(), option))
+                                                     capture_frame.winfo_width(), capture_frame.winfo_height(), option))
     thread.daemon = True
     return thread
 
@@ -122,7 +122,7 @@ def stopCapture():
 
 
 def getCommand(x, y, width, height):
-    return "python captureScreen.py %d %d %d %d" % ((x+error_x), (y+error_y), (x+width+error_x), (y+height))
+    return "python captureScreen.py %d %d %d %d" % ((x+error_x), (y+error_y), (x+width+6), (y+height+30))
 
 
 def initializeCaptureFrame():
