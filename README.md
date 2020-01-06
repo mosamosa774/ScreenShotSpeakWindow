@@ -1,4 +1,4 @@
-# ScreenShot Speak Window
+# Speak ScreenShot
 
 このアプリケーションはGUIウィンドウで指定した画面の一部分のスクリーンショットからOCRでテキストを抽出し棒読みちゃん(+Voiceroid)にしゃべってもらうためのものです。
 
