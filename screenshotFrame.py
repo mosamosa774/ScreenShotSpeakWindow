@@ -34,18 +34,15 @@ def resize(event):
 
 def hideFrame():
     root.withdraw()
-    threading.Thread(target=lambda: tray.generateTrayIcon()).start()
+    threading.Thread(target=lambda: tray.generateTrayIcon(
+        lambda: releaseHide())).start()
     print("start hiding")
-    root.after(1000, checkHideingFrame)
 
 
-def checkHideingFrame():
-    if not tray.icon_exist:
-        print("end hiding")
-        root.update()
-        root.deiconify()
-        return
-    root.after(1000, checkHideingFrame)
+def releaseHide():
+    print("end hiding")
+    root.update()
+    root.deiconify()
 
 
 def speakTextInImage():

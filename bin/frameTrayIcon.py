@@ -3,13 +3,15 @@ import pystray
 
 icon_exist = False
 
-def resume():
+
+def resume(release_func):
     global icon_exist
     icon_exist = False
+    release_func()
     icon.stop()
 
 
-def generateTrayIcon():
+def generateTrayIcon(release_func):
     global icon, icon_exist
     icon_exist = True
     icon = pystray.Icon('Speak Screenshot')
@@ -17,7 +19,7 @@ def generateTrayIcon():
     icon.icon = ico
     icon.menu = pystray.Menu(pystray.MenuItem(
         'Resume',
-        resume))
+        lambda: resume(release_func)))
     icon.run()
 
 
