@@ -1,8 +1,9 @@
 {
-    "bouyomi_exe": "C:/Users/oogar/Documents/BouyomiChan/BouyomiChan.exe",
-    "height": 572,
-    "volume": 70,
-    "width": 507,
-    "x": 52,
-    "y": 52
+    "height": 418,
+    "seika_center_exe": "C:/Program Files (x86)/510product/SeikaCenter/SeikaCenter.exe",
+    "voiceroid_exe": "C:/Program Files (x86)/AHS/VOICEROID2/VoiceroidEditor.exe",
+    "volume": 100,
+    "width": 289,
+    "x": 104,
+    "y": 104
 }

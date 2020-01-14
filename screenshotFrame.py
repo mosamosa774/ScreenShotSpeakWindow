@@ -11,7 +11,7 @@ import bin.modifyCapture as modify
 import bin.imageDiff as diff
 import bin.speak as speak
 import bin.frameTrayIcon as tray
-import bin.bouyomichan as bouyomichan
+import bin.voiceroid as voiceroid
 
 
 settings_path = "settings.json"
@@ -57,10 +57,11 @@ def speakTextInImage():
             shutil.copy(img, "screen.png")
             capture_thread = defineCaptureThread(modify.not_remove_key)
             capture_thread.start()
-            root.after(1000, checkCapture)
 
 
 def capture(x, y, width, height, option=""):
+    global capture_thread
+    entityChangesApply()
     print("start speech")
     root.title(u"Speak Screenshot (Capturing)")
     subprocess.run(getCommand(x, y, width, height
@@ -71,21 +72,24 @@ def capture(x, y, width, height, option=""):
         modify.modifyCapture(option=option)
         speak.setTalkable(True)
         root.title(u"Speak Screenshot (Speaking)")
-        speak.speak(speak.loadDraft(), speak.akari)
+        speak.speak(speak.loadDraft(),
+                    speak.speaker["akari"], volume=float(volume)/100)
         print("end speech")
-    root.after(1000, checkCapture)
 
-
-def checkCapture():
-    global capture_thread
-    entityChangesApply()
-    if be_caputuring and not capture_thread.is_alive():
+    if be_caputuring:
         print("reraise", be_caputuring, capture_thread.is_alive())
         capture_thread = defineCaptureThread()
         capture_thread.start()
-        root.after(1000, checkCapture)
-    elif be_caputuring and capture_thread.is_alive():
-        root.after(1000, checkCapture)
+
+
+# def checkCapture():
+#    if be_caputuring and not capture_thread.is_alive():
+#        print("reraise", be_caputuring, capture_thread.is_alive())
+#        capture_thread = defineCaptureThread()
+#        capture_thread.start()
+#        root.after(1000, checkCapture)
+#    elif be_caputuring and capture_thread.is_alive():
+#        root.after(1000, checkCapture)
 
 
 def startCapture():
@@ -160,6 +164,7 @@ def initializeRoot():
     root.title(u"Speak Screenshot")
     root.iconbitmap("../src/icon.ico")
     root.wm_attributes("-transparentcolor", "yellow")
+    print('%dx%d+%d+%d' % (init_width, init_height, init_x, init_y))
     root.geometry('%dx%d+%d+%d' % (init_width, init_height, init_x, init_y))
     root.attributes("-topmost", True)
     root.bind("<Configure>", resize)
@@ -168,7 +173,7 @@ def initializeRoot():
 
 
 def readSettings():
-    global init_width, init_height, init_x, init_y, volume, bouyomi_exe
+    global init_width, init_height, init_x, init_y, volume, voiceroid_exe, seika_center_exe
     print("open")
     settings = open(settings_path)
     settings_dict = json.load(settings)
@@ -177,16 +182,24 @@ def readSettings():
     init_width = int(settings_dict["width"])
     init_height = int(settings_dict["height"])
     volume = int(settings_dict["volume"])
-    bouyomi_exe = settings_dict["bouyomi_exe"]
+    voiceroid_exe = settings_dict["voiceroid_exe"]
+    seika_center_exe = settings_dict["seika_center_exe"]
+    print((init_width, init_height, init_x, init_y))
 
 
 def onClosing():
     print("close")
     entityChangesApply()
-    save_dict = {"x": root.winfo_x(), "y": root.winfo_y(), "width": root.winfo_width(),
-                 "height": root.winfo_height(), "volume": volume, "bouyomi_exe": bouyomi_exe}
+    settings = open(settings_path)
+    settings_dict = json.load(settings)
+    settings.close()
+    settings_dict["x"] = root.winfo_x()
+    settings_dict["y"] = root.winfo_y()
+    settings_dict["width"] = root.winfo_width()
+    settings_dict["height"] = root.winfo_height()
+    settings_dict["volume"] = volume
     settings = open(settings_path, 'w')
-    json.dump(save_dict, settings, sort_keys=True, indent=4)
+    json.dump(settings_dict, settings, sort_keys=True, indent=4)
     root.destroy()
 
 
@@ -211,8 +224,8 @@ if __name__ == '__main__':
     initializeRoot()
     initializeToolFrame()
     initializeCaptureFrame()
-    if not bouyomichan.checkBouyomiChanIsAlive():
-        bouyomichan.launchBouyomiChan(bouyomi_exe)
+    res = voiceroid.check(voiceroid_exe, seika_center_exe)
+    if len(res) > 0:
         res = messagebox.showinfo(
-            "Confirmation", "棒読みちゃんを起動しました\n準備が完了したらOKを押してください")
+            "Confirmation", res)
     root.mainloop()

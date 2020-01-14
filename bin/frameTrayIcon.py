@@ -23,5 +23,5 @@ def generateTrayIcon(release_func):
     icon.run()
 
 
-if __name__ == "__main__":
-    generateTrayIcon()
+# if __name__ == "__main__":
+#    generateTrayIcon()

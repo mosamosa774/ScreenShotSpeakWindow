@@ -4,12 +4,17 @@ import time
 
 
 speech_file_path = "modified_res.txt"
-bouyomi_path = ".\BouyomiChan %d %d %d %d \"%s\""
+seikasay_path = ".\SeikaSay -cid %s -volume %f -speed %f -t \"%s\""
 
-max_speed = 200
+max_speed = 2
+draft_length = 30
 
-akari = "k)"
+speaker = {"akari": "2000"}
 talkable = True
+
+
+def loadSpeakerSettings():
+    print("not implementing")
 
 
 def loadDraft():
@@ -22,18 +27,17 @@ def setTalkable(flag=True):
     talkable = flag
 
 
-def speak(draft, speaker, speed=100, tone=-1, volume=-1, voice=0):
+def speak(draft, speaker, speed=1, volume=1):
     try:
         if(len(draft) > 0):
             for talk in draft.split("。"):
                 if not talkable:
                     break
                 if len(talk) > 0:
-                    print(bouyomi_path % (
-                        min([max_speed, max([len(draft*2), speed])]), tone, volume, voice, speaker + talk))
-                    subprocess.run(bouyomi_path %
-                                   (min([max_speed, max([len(draft*2), speed])]), tone, volume, voice, speaker + talk), shell=True)
-                    time.sleep(len(talk)/4)
+                    print(seikasay_path % (speaker,
+                                           volume, min([max_speed, max([len(talk)/draft_length, speed])]), talk))
+                    subprocess.run(seikasay_path % (speaker,
+                                                    volume, min([max_speed, max([len(talk)/draft_length, speed])]), talk), shell=True)
         else:
             print("No Speak")
     except Exception as e:
@@ -41,5 +45,5 @@ def speak(draft, speaker, speed=100, tone=-1, volume=-1, voice=0):
 
 
 if __name__ == "__main__":
-    speak(loadDraft(), akari)
-    speak("マイクテスト、マイクテスト　マイクテスト。マイクテスト！マイクテスト？", akari)
+    loadSpeakerSettings()
+    speak("マイクテスト、マイクテスト　マイクテスト。マイクテスト！マイクテスト？", speaker["akari"])
