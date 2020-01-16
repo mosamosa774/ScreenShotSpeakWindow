@@ -8,14 +8,17 @@ def getPS():
     return stdout
 
 
-def checkVoiceroidIsAlive(stdout):
-    count = 0
-    for line in stdout:
+def checkVoiceroidIsAlive():
+    stdout = subprocess.check_output(
+        ["tasklist", "/FI", "WINDOWTITLE eq VOICEROID2"])
+    stdout_aster = subprocess.check_output(
+        ["tasklist", "/FI", "WINDOWTITLE eq VOICEROID2*"])
+    lines = str(stdout).split("\n")
+    lines.extend(str(stdout_aster).split("\n"))
+    for line in lines:
         if "VoiceroidEditor.exe" in str(line):
-            count += 1
-    if count == 2:
-        print("found")
-        return True
+            print("found")
+            return True
     return False
 
 
@@ -35,7 +38,7 @@ def check(voiceroid_exe, seika_center_exe):
     init_msg = "%s起動が完了したらOKを押してください"
     msg = ""
     stdout = getPS()
-    if not checkVoiceroidIsAlive(stdout):
+    if not checkVoiceroidIsAlive():
         launchProcess(voiceroid_exe)
         msg += "Voiceroidを起動しました\nアプリケーション使用前にSeikaCenterの起動ボタンを押してください\n"
     if not checkSeikaCenterIsAlive(stdout):

@@ -1,3 +1,4 @@
+
 import os
 import sys
 import tkinter as tk
@@ -7,11 +8,6 @@ import subprocess
 import json
 import time
 import shutil
-import bin.modifyCapture as modify
-import bin.imageDiff as diff
-import bin.speak as speak
-import bin.frameTrayIcon as tray
-import bin.voiceroid as voiceroid
 
 
 settings_path = "settings.json"
@@ -73,7 +69,7 @@ def capture(x, y, width, height, option=""):
         speak.setTalkable(True)
         root.title(u"Speak Screenshot (Speaking)")
         speak.speak(speak.loadDraft(),
-                    speak.speaker["akari"], volume=float(volume)/100)
+                    speak.speaker, volume=float(volume)/100)
         print("end speech")
 
     if be_caputuring:
@@ -165,7 +161,8 @@ def initializeRoot():
     root.iconbitmap("../src/icon.ico")
     root.wm_attributes("-transparentcolor", "yellow")
     print('%dx%d+%d+%d' % (init_width, init_height, init_x, init_y))
-    root.geometry('%dx%d+%d+%d' % (init_width, init_height, init_x, init_y))
+    root.geometry('%dx%d' % (init_width, init_height))
+    root.geometry('+%d+%d' % (init_x, init_y))
     root.attributes("-topmost", True)
     root.bind("<Configure>", resize)
     root.resizable(True, True)
@@ -184,7 +181,7 @@ def readSettings():
     volume = int(settings_dict["volume"])
     voiceroid_exe = settings_dict["voiceroid_exe"]
     seika_center_exe = settings_dict["seika_center_exe"]
-    print((init_width, init_height, init_x, init_y))
+    speak.speaker = settings_dict["speaker"]
 
 
 def onClosing():
@@ -213,6 +210,12 @@ def entityChangesApply():
 
 
 if __name__ == '__main__':
+    sys.path.append('bin')
+    import modifyCapture as modify
+    import imageDiff as diff
+    import speak as speak
+    import frameTrayIcon as tray
+    import voiceroid as voiceroid
     if not os.path.exists("bin"):
         tk.Tk().withdraw()
         res = messagebox.showinfo(

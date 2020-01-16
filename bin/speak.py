@@ -9,7 +9,7 @@ seikasay_path = ".\SeikaSay -cid %s -volume %f -speed %f -t \"%s\""
 max_speed = 2
 draft_length = 30
 
-speaker = {"akari": "2000"}
+speaker = "2000"
 talkable = True
 
 
@@ -46,4 +46,4 @@ def speak(draft, speaker, speed=1, volume=1):
 
 if __name__ == "__main__":
     loadSpeakerSettings()
-    speak("マイクテスト、マイクテスト　マイクテスト。マイクテスト！マイクテスト？", speaker["akari"])
+    speak("マイクテスト、マイクテスト　マイクテスト。マイクテスト！マイクテスト？", speaker)
